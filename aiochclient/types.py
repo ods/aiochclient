@@ -1,6 +1,7 @@
 import datetime as dt
 import re
 from abc import ABC, abstractmethod
+from decimal import Decimal
 from typing import Any, Callable, Generator, Optional
 from uuid import UUID
 
@@ -140,6 +141,17 @@ class FloatType(IntType):
         return b"%r" % value
 
 
+class DecimalType(BaseType):
+    p_type = Decimal
+
+    def convert(self, value: bytes) -> Decimal:
+        return self.p_type(value.decode())
+
+    @staticmethod
+    def unconvert(value: Decimal) -> bytes:
+        return str(value).encode()
+
+
 class DateType(BaseType):
     def p_type(self, string: str):
         string = string.strip("'")
@@ -276,6 +288,7 @@ CH_TYPES_MAPPING = {
     "Int64": IntType,
     "Float32": FloatType,
     "Float64": FloatType,
+    "Decimal": DecimalType,
     "String": StrType,
     "FixedString": StrType,
     "Enum8": StrType,
