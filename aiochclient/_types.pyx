@@ -1,4 +1,5 @@
 #cython: language_level=3
+from decimal import Decimal
 import re
 from uuid import UUID
 from cpython.datetime cimport date, datetime
@@ -112,7 +113,7 @@ cdef list seq_parser(str raw):
 
 
 cdef class StrType:
-    
+
     cdef:
         str name
         bint container
@@ -125,7 +126,7 @@ cdef class StrType:
         if self.container:
             return string.strip("'")
         return string
-    
+
     cpdef str p_type(self, str string):
         return self._convert(string)
 
@@ -286,6 +287,23 @@ cdef class FloatType:
         return float(value)
 
 
+cdef class DecimalType:
+
+    cdef:
+        str name
+        bint container
+
+    def __cinit__(self, str name, bint container):
+        self.name = name
+        self.container = container
+
+    cpdef object p_type(self, str string):
+        return Decimal(string)
+
+    cpdef object convert(self, bytes value):
+        return Decimal(value.decode())
+
+
 cdef class DateType:
 
     cdef:
@@ -426,7 +444,7 @@ cdef class NothingType:
 
     cpdef void p_type(self, str string):
         pass
-    
+
     cpdef void convert(self, bytes value):
         pass
 
@@ -484,6 +502,7 @@ cdef dict CH_TYPES_MAPPING = {
     "Int64": Int64Type,
     "Float32": FloatType,
     "Float64": FloatType,
+    "Decimal": DecimalType,
     "String": StrType,
     "FixedString": StrType,
     "Enum8": StrType,
